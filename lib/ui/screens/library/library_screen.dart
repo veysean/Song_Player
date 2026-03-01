@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:practice/ui/states/settings_state.dart';
 import 'package:provider/provider.dart';
- 
+
 import '../../../data/repositories/songs/song_repository.dart';
 import '../../../model/songs/song.dart';
 import '../../states/player_state.dart';
@@ -14,12 +15,13 @@ class LibraryScreen extends StatelessWidget {
     // 1- Read the global song repository
     SongRepository songRepository = context.read<SongRepository>();
     List<Song> songs = songRepository.fetchSongs();
- 
+
     // 3 - Watch the global player state
     PlayerState playerState = context.watch<PlayerState>();
+    AppSettingsState appSettingsState = context.watch<AppSettingsState>();
 
     return Container(
-    
+      color: appSettingsState.theme.backgroundColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

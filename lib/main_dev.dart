@@ -17,12 +17,13 @@ List<SingleChildWidget> get devProviders {
 
     // 2 - Inject the player state
     ChangeNotifierProvider<PlayerState>(create: (_) => PlayerState()),
+    
+    // 4 - Inject App Settings Repository
+    Provider<AppSettingsRepositoryMock>(create: (_)=>AppSettingsRepositoryMock()),
 
     // 3 - Inject the  app setting state
     ChangeNotifierProvider<AppSettingsState>(create: (context) => AppSettingsState(context.read<AppSettingsRepositoryMock>())),
 
-    // 4 - Inject App Settings Repository
-    Provider<AppSettingsRepositoryMock>(create: (_)=>AppSettingsRepositoryMock())
   ];
 }
 
