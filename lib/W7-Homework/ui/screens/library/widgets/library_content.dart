@@ -6,7 +6,7 @@ import '../../../../model/songs/song.dart';
 import '../view_model/library_view_model.dart';
 
 class LibraryContent extends StatelessWidget {
-  LibraryContent({super.key});
+  const LibraryContent({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,17 +23,32 @@ class LibraryContent extends StatelessWidget {
           SizedBox(height: 50),
 
           Expanded(
-            child: ListView.builder(
-              itemCount: viewModel.songs.length,
-              itemBuilder: (context, index) {
-                final song = viewModel.songs[index];
-                return SongTile(
-                  song: song,
-                  isPlaying: viewModel.currentSong == song,
-                  onPlay: () => viewModel.play(song),
-                  onStop: () => viewModel.stop(),
-                );
-              },
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Your recent songs", style: AppTextStyles.body),
+                  ...viewModel.recentSongs.map(
+                    (song) => SongTile(
+                      song: song,
+                      isPlaying: viewModel.currentSong == song,
+                      onPlay: () => viewModel.play(song),
+                      onStop: () => viewModel.stop(),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  Text("All songs", style: AppTextStyles.body),
+                  ...viewModel.songs.map(
+                    (song) => SongTile(
+                      song: song,
+                      isPlaying: viewModel.currentSong == song,
+                      onPlay: () => viewModel.play(song),
+                      onStop: () => viewModel.stop(),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
