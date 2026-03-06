@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practice/W7-Homework/data/repositories/songs/user_history_repository.dart';
 import 'package:provider/provider.dart';
 import '../../../data/repositories/songs/song_repository.dart';
 import '../../states/player_state.dart';
@@ -12,17 +13,19 @@ class LibraryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final songRepository = context.read<SongRepository>();
     final playerState = context.read<PlayerState>();
+    final userHistoryRepository = context.read<UserHistoryRepository>();
 
     return ChangeNotifierProvider(
       create: (_) {
         final vm = LibraryViewModel(
           songRepository: songRepository,
+          userHistoryRepository : userHistoryRepository,
           playerState: playerState,
         );
         vm.init();
         return vm;
       },
-      child: LibraryContent(),
+      child: const LibraryContent(),
     );
   }
 }
