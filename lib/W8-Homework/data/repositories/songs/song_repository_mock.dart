@@ -36,12 +36,16 @@ class SongRepositoryMock implements SongRepository {
       duration: const Duration(minutes: 3, seconds: 20),
     ),
   ];
-
+  int _attemptFetch = 0;
   @override
   Future<List<Song>> fetchSongs() async {
-    await Future.delayed(Duration(minutes: 2), () {});
-
-    return _songs;
+    _attemptFetch++;
+    return Future.delayed(Duration(seconds: 3), () {
+      if (_attemptFetch % 2 == 0) {
+        throw Exception('Failed to fetch songs');
+      }
+      return _songs;
+    });
   }
 
   @override
