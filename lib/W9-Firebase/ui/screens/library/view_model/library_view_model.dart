@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:practice/W9-Firebase/ui/screens/library/view_model/song_with_artist.dart';
+import '../../../../data/repositories/artists/artist_repository.dart';
 import '../../../../data/repositories/songs/song_repository.dart';
+import '../../../../model/artists/artist.dart';
 import '../../../states/player_state.dart';
 import '../../../../model/songs/song.dart';
 import '../../../utils/async_value.dart';
@@ -7,10 +10,15 @@ import '../../../utils/async_value.dart';
 class LibraryViewModel extends ChangeNotifier {
   final SongRepository songRepository;
   final PlayerState playerState;
+  final ArtistRepository artistRepository;
 
-  AsyncValue<List<Song>> songsValue = AsyncValue.loading();
+  AsyncValue<List<SongWithArtist>> songsValue = AsyncValue.loading();
 
-  LibraryViewModel({required this.songRepository, required this.playerState}) {
+  LibraryViewModel({
+    required this.songRepository,
+    required this.playerState,
+    required this.artistRepository,
+  }) {
     playerState.addListener(notifyListeners);
 
     // init
@@ -35,13 +43,23 @@ class LibraryViewModel extends ChangeNotifier {
     try {
       // 2- Fetch is successfull
       List<Song> songs = await songRepository.fetchSongs();
-      songsValue = AsyncValue.success(songs);
+      List<Artist> artists = await artistRepository.fetchArtists();
+
+      Map<String, Artist> mapArtist = {};
+      for (Artist artist in artists) {
+        mapArtist[artist.id] = artist;
+      }
+
+      final result = songs.map((song) {
+        final artist = mapArtist[song.artistId];
+        return SongWithArtist(song: song, artist: artist!);
+      }).toList();
+      songsValue = AsyncValue.success(result);
     } catch (e) {
       // 3- Fetch is unsucessfull
       songsValue = AsyncValue.error(e);
     }
-     notifyListeners();
-
+    notifyListeners();
   }
 
   bool isSongPlaying(Song song) => playerState.currentSong == song;

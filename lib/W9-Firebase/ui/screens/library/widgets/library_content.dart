@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:practice/W9-Firebase/ui/screens/library/view_model/song_with_artist.dart';
 import 'package:provider/provider.dart';
 import '../../../../model/songs/song.dart';
 import '../../../theme/theme.dart';
 import '../../../utils/async_value.dart';
 import '../../../widgets/song/song_tile.dart';
 import '../view_model/library_view_model.dart';
+import 'library_tile.dart';
 
 class LibraryContent extends StatelessWidget {
   const LibraryContent({super.key});
@@ -14,28 +16,33 @@ class LibraryContent extends StatelessWidget {
     // 1- Read the globbal song repository
     LibraryViewModel mv = context.watch<LibraryViewModel>();
 
-    AsyncValue<List<Song>> asyncValue = mv.songsValue;
+    AsyncValue<List<SongWithArtist>> asyncValue = mv.songsValue;
 
     Widget content;
     switch (asyncValue.state) {
-      
       case AsyncValueState.loading:
         content = Center(child: CircularProgressIndicator());
         break;
       case AsyncValueState.error:
-        content = Center(child: Text('error = ${asyncValue.error!}', style: TextStyle(color: Colors.red),));
+        content = Center(
+          child: Text(
+            'error = ${asyncValue.error!}',
+            style: TextStyle(color: Colors.red),
+          ),
+        );
 
       case AsyncValueState.success:
-        List<Song> songs = asyncValue.data!;
+        List<SongWithArtist> songs = asyncValue.data!;
         content = ListView.builder(
           itemCount: songs.length,
-          itemBuilder: (context, index) => SongTile(
-            song: songs[index],
-            isPlaying: mv.isSongPlaying(songs[index]),
-            onTap: () {
-              mv.start(songs[index]);
-            },
-          ),
+          itemBuilder: (context, index) {
+            final songWithArtist = songs[index];
+            return SongWithArtistTile(
+              songWithArtist: songWithArtist,
+              isPlaying: mv.isSongPlaying(songWithArtist.song),
+              onTap: () => mv.start(songWithArtist.song),
+            );
+          },
         );
     }
 
