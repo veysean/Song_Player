@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../view_model/library_item_data.dart';
+import '../view_model/library_view_model.dart';
 
 class LibraryItemTile extends StatelessWidget {
   const LibraryItemTile({
@@ -29,17 +31,29 @@ class LibraryItemTile extends StatelessWidget {
             children: [
               Text("${data.song.duration.inMinutes} mins"),
               SizedBox(width: 20),
-              Text(data.artist.name),
               SizedBox(width: 20),
-              Text(data.artist.genre),
+              Text("${data.song.likes} likes"),
             ],
           ),
           leading: CircleAvatar(
             backgroundImage: NetworkImage(data.song.imageUrl.toString()),
           ),
-          trailing: Text(
-            isPlaying ? "Playing" : "",
-            style: TextStyle(color: Colors.amber),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              
+              IconButton(
+                icon: const Icon(Icons.favorite, color: Colors.lightBlue),
+                onPressed: () {
+                  final mv = context.read<LibraryViewModel>();
+                  mv.likeSong(data.song);
+                },
+              ),
+              Text(
+                isPlaying ? "Playing" : "",
+                style: const TextStyle(color: Colors.amber),
+              ),
+            ],
           ),
         ),
       ),

@@ -17,20 +17,34 @@ class SongRepositoryFirebase extends SongRepository {
     final http.Response response = await http.get(songsUri);
 
     if (response.statusCode == 200) {
-      // 1 - Send the retrieved list of songs
       Map<String, dynamic> songJson = json.decode(response.body);
-
       List<Song> result = [];
       for (final entry in songJson.entries) {
         result.add(SongDto.fromJson(entry.key, entry.value));
       }
       return result;
     } else {
-      // 2- Throw expcetion if any issue
-      throw Exception('Failed to load posts');
+      throw Exception('Failed to load songs');
     }
   }
 
   @override
   Future<Song?> fetchSongById(String id) async {}
+
+  @override
+  Future<void> likeSong(String songId, int currentLikes) async {
+    final Uri songURL = Uri.https(
+      'fir-b72ad-default-rtdb.asia-southeast1.firebasedatabase.app',
+      '/songs/$songId.json',
+    );
+
+    final response = await http.patch(
+      songURL,
+      body: json.encode({"likes": currentLikes + 1}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to like song $songId");
+    }
+  }
 }
