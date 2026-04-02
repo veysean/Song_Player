@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:practice/W10-Firebase_Part2/ui/screens/artist_details/artist_detail_screen.dart';
 import '../../../model/artist/artist.dart';
 
 class ArtistTile extends StatelessWidget {
-  const ArtistTile({
-    super.key,
-    required this.artist,
-    
-  });
+  const ArtistTile({super.key, required this.artist});
 
   final Artist artist;
 
@@ -25,6 +22,14 @@ class ArtistTile extends StatelessWidget {
           leading: CircleAvatar(
             backgroundImage: NetworkImage(artist.imageUrl.toString()),
           ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ArtistDetailScreen(artistId: artist.id),
+              ),
+            );
+          },
         ),
       ),
     );

@@ -1,42 +1,101 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
 import '../../../model/artist/artist.dart';
+import '../../../model/comment/comment.dart';
+import '../../../model/songs/song.dart';
 import '../../dtos/artist_dto.dart';
+import '../../dtos/song_dto.dart';
+import '../../dtos/comment_dto.dart';
 import 'artist_repository.dart';
 
 class ArtistRepositoryFirebase implements ArtistRepository {
-  final Uri artistsUri = Uri.https(
-    'test-a2a77-default-rtdb.asia-southeast1.firebasedatabase.app',
-    '/artists.json',
-  );
+  final String baseUrl =
+      'fir-b72ad-default-rtdb.asia-southeast1.firebasedatabase.app';
 
   List<Artist>? _cachedArtists;
+
+  Uri _buildUri(String path) => Uri.https(baseUrl, path);
 
   @override
   Future<List<Artist>> fetchArtists({bool forceFetch = false}) async {
     if (!forceFetch && _cachedArtists != null) {
       return _cachedArtists!;
     }
-    final http.Response response = await http.get(artistsUri);
+
+    final response = await http.get(_buildUri('/artists.json'));
 
     if (response.statusCode == 200) {
-      // 1 - Send the retrieved list of songs
-      Map<String, dynamic> songJson = json.decode(response.body);
+      final Map<String, dynamic> artistJson = json.decode(response.body);
+      final result = artistJson.entries
+          .map((entry) => ArtistDto.fromJson(entry.key, entry.value))
+          .toList();
 
-      List<Artist> result = [];
-      for (final entry in songJson.entries) {
-        result.add(ArtistDto.fromJson(entry.key, entry.value));
-      }
       _cachedArtists = result;
       return result;
     } else {
-      // 2- Throw expcetion if any issue
-      throw Exception('Failed to load posts');
+      throw Exception('Failed to load artists');
     }
   }
 
   @override
-  Future<Artist?> fetchArtistById(String id) async {}
+  Future<Artist?> fetchArtistById(String id) async {
+    final response = await http.get(_buildUri('/artists/$id.json'));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic>? artistJson = json.decode(response.body);
+      if (artistJson == null) return null;
+      return ArtistDto.fromJson(id, artistJson);
+    } else {
+      throw Exception('Failed to load artist $id');
+    }
+  }
+
+  @override
+  Future<List<Song>> fetchArtistSongs(String artistId) async {
+    final response = await http.get(_buildUri('/songs.json'));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> songsJson = json.decode(response.body);
+      return songsJson.entries
+          .where((entry) => entry.value['artistId'] == artistId)
+          .map((entry) => SongDto.fromJson(entry.key, entry.value))
+          .toList();
+    } else {
+      throw Exception('Failed to load songs for artist $artistId');
+    }
+  }
+
+  @override
+  Future<List<Comment>> fetchArtistComments(String artistId) async {
+    final response = await http.get(_buildUri('/comments.json'));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> commentsJson = json.decode(response.body);
+      return commentsJson.entries
+          .where((entry) => entry.value['artistId'] == artistId)
+          .map((entry) => CommentDto.fromJson(entry.key, entry.value))
+          .toList();
+    } else {
+      throw Exception('Failed to load comments for artist $artistId');
+    }
+  }
+
+  @override
+  Future<void> postComment(String artistId, String text) async {
+    final newComment = Comment(
+      id: '',
+      artistId: artistId,
+      text: text,
+    );
+
+    final response = await http.post(
+      _buildUri('/comments.json'),
+      body: json.encode(CommentDto().toJson(newComment)),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to post comment');
+    }
+  }
 }
