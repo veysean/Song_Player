@@ -48,10 +48,21 @@ class ArtistsContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 16),
-          Text("Library", style: AppTextStyles.heading),
-          SizedBox(height: 50),
-
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Artists", style: AppTextStyles.heading),
+              const SizedBox(width: 12),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.blue),
+                onPressed: () async {
+                  mv.fetchArtists(forceFetch: true);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 50),
           Expanded(child: content),
         ],
       ),
